@@ -52,6 +52,7 @@ import com.google.inject.Inject;
 					
 					config.getNode("Global","Enabled").setValue(true);
 					mainConfig.save(config);
+					getLogger().info("Default core config created at" + coreFile.getAbsolutePath().substring(0,coreFile.getAbsolutePath().lastIndexOf(File.separator)));
 				}
 				if (!userFile.exists()) {
 					userFile.createNewFile();
@@ -61,11 +62,10 @@ import com.google.inject.Inject;
 					config2.getNode("uuid_here","Race").setValue("human");
 					config2.getNode("uuid_here","Channel").setValue("global");
 					userConfig.save(config2);
+					getLogger().info("Default user config created at" + userFile.getAbsolutePath().substring(0,userFile.getAbsolutePath().lastIndexOf(File.separator)));
 				}
-				
-			    config = mainConfig.load();
-			    config2 = userConfig.load();
-			    
+				config = mainConfig.load();
+				config2 = userConfig.load();
 			} catch (IOException exception) {
 			    getLogger().error("Configurations could not be loaded or created!");
 			}
