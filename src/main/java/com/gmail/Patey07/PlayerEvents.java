@@ -1,9 +1,9 @@
 package com.gmail.Patey07;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
-
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -18,7 +18,7 @@ import org.spongepowered.api.text.format.TextColors;
 import com.google.common.base.Function;
 
 public class PlayerEvents {
-	String[][] playerList = null;
+	static String[][] playerList = null;
 	ConfigurationNode eventNode;
 	ConfigurationLoader<CommentedConfigurationNode> eventConfig;
 	
@@ -70,26 +70,25 @@ public class PlayerEvents {
 				jEvent.getUser().kick(getMessage("That's somone else's name!"));
 			}else if (playerList[i][0].equals(player) && playerList[i][1] != playerName){
 				jEvent.getUser().kick(getMessage("Sorry,"+playerName+"no multiple names untill sponge updates"));
-			}else if (i == playerList.length){
-				String[] tempArr = new String[playerList.length+1];
-				String[][] temp2D = new String[tempArr.length][4];
+			}else if (i > playerList.length -1 && playerList[i][0] != player && playerList[i][1] != playerName){
+				String[][] tempArr = new String[playerList.length+1][4];
 				for (int j=0; j<tempArr.length; j++){
-					if (j==tempArr.length){
+					if (j > tempArr.length-1){
 						String[] tempPlayer = {player, playerName ,"spirit","global"};
-						temp2D[j] = tempPlayer;
-						playerList[j] = temp2D[j];
-						eventNode.getNode("Players",playerList[i][0]).setValue(playerList[j]);
+						tempArr[j] = tempPlayer;
+						List<String> savePlayer = new ArrayList<String>(Arrays.asList(tempPlayer)); 
+						eventNode.getNode("Players",player).setValue(savePlayer);
+						playerList = new String[tempArr.length][4];
+						playerList = tempArr;
 						try {
 							eventConfig.save(eventNode);
 						} catch (IOException e) {
 							getLogger().error("user config could not be edited for "+playerName);
 						}
 					}else{
-						temp2D[j] = playerList[j];
+						tempArr[j] = playerList[j];
 					}
 				}
-				
-				
 			}
 		}
 		

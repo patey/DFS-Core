@@ -72,6 +72,7 @@ import com.google.inject.Inject;
 			    getLogger().error("Configurations could not be loaded or created!");
 			}
 			event.getGame().getEventManager().register(this, new PlayerEvents(config2,userConfig));
+			event.getGame().getEventManager().register(this, new ChatEvents());
 			getLogger().info("DwarfFortressSuite Core initialized");
 	    }
 	}
