@@ -16,13 +16,15 @@ import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.event.state.ServerStartingEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.config.ConfigDir;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.util.command.args.GenericArguments;
+import org.spongepowered.api.util.command.spec.CommandSpec;
+
 import com.google.inject.Inject;
 
 	@Plugin(id = "DFSCore", name = "DFS-Core", version = "0.1.0")
 	public class DFSCore {
-		
 		private static Logger logger;
-
 		@Inject
 		public DFSCore(Logger logger) {
 		    DFSCore.logger = logger;
@@ -39,8 +41,6 @@ import com.google.inject.Inject;
 		File userFile = new File(this.configDir,"users.conf");
 		ConfigurationLoader<CommentedConfigurationNode> userConfig = HoconConfigurationLoader.builder().setFile(userFile).build();
 		
-
-		
 		@Subscribe
 	    public void onServerStart(ServerStartingEvent event) {
 			ConfigurationNode config = null;
@@ -50,7 +50,11 @@ import com.google.inject.Inject;
 					coreFile.createNewFile();
 					config = mainConfig.load();
 					
-					config.getNode("Global","Enabled").setValue(true);
+					config.getNode("Chat","Global").setValue(true);
+					config.getNode("Chat","Ranges","Regular").setValue(3);
+					config.getNode("Chat","Ranges","Whisper").setValue(3);
+					config.getNode("Chat","Ranges","Yell").setValue(75);
+					config.getNode("Chat","Ranges","Province").setValue(750);
 					mainConfig.save(config);
 					getLogger().info("Default core config created at" + coreFile.getAbsolutePath().substring(0,coreFile.getAbsolutePath().lastIndexOf(File.separator)));
 				}
@@ -71,8 +75,30 @@ import com.google.inject.Inject;
 			} catch (IOException exception) {
 			    getLogger().error("Configurations could not be loaded or created!");
 			}
+			
+			CommandSpec channelCommand = CommandSpec.builder()
+				    .description(Texts.of("/channel <channel>"))
+				    .permission("DFSC.command.channel")
+				    .arguments(
+	                GenericArguments.onlyOne(GenericArguments.string(Texts.of("channel")))
+	                )
+				    .executor(new channelCommand(config,config2,userConfig))
+				    .build();
+				;
+				CommandSpec raceCommand = CommandSpec.builder()
+					    .description(Texts.of("/race <race>"))
+					    .permission("DFSC.command.race")
+					    .arguments(
+		                GenericArguments.onlyOne(GenericArguments.string(Texts.of("race")))
+		                )
+					    .executor(new raceCommand(config,config2,userConfig))
+					    .build();
+					;
+				
 			event.getGame().getEventManager().register(this, new PlayerEvents(config2,userConfig));
-			event.getGame().getEventManager().register(this, new ChatEvents());
+			event.getGame().getEventManager().register(this, new ChatEvents(config));
+			event.getGame().getCommandDispatcher().register(this, channelCommand, "channel", "c");
+			event.getGame().getCommandDispatcher().register(this, raceCommand, "race", "r");
 			getLogger().info("DwarfFortressSuite Core initialized");
 	    }
 	}

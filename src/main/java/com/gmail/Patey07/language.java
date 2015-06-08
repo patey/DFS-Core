@@ -89,7 +89,7 @@ public class language {
 	}
 	
 	public String[] findFunctions(String[] words,String race){
-		if (race.equals("none")){
+		if (race.equals("spirit")){
 			return words;
 		}
 		Pattern patterni = Pattern.compile("[iI]");
