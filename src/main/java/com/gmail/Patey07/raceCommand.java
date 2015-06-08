@@ -41,7 +41,7 @@ public class raceCommand implements CommandExecutor {
 				tempArr[2] = chan;
 				raceArr[i] = tempArr;
 				List<String> tempList = new ArrayList<String>(Arrays.asList(tempArr));
-				raceNode.getNode("Players",player.getUniqueId().toString()).setValue(tempList);
+				raceNode.getNode("Players",player.getUniqueId().toString(),"Data").setValue(tempList);
 				try {
 					raceConfig.save(raceNode);
 					PlayerEvents.playerList = raceArr;

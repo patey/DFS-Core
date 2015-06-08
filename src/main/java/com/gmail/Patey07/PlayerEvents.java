@@ -40,14 +40,14 @@ public class PlayerEvents {
 		playerList = new String[tempUUIDS.length][4];
 		String[] playerUUIDS = new String[tempUUIDS.length];
 		if (tempUUIDS.length != 0){
-			for (int k=tempUUIDS.length-1; k<tempUUIDS.length; k++){
+			for (int k=0; k<tempUUIDS.length; k++){
 				playerUUIDS[k] = tempUUIDS[k].toString();
 			}
 		}
 		if (playerUUIDS.length != 0){
 			for (int i=0; i < playerUUIDS.length; i++){
 				String player = playerUUIDS[i];
-				List<String> tempList = rootNode.getNode("Players",player).getList(stringTransformer);
+				List<String> tempList = rootNode.getNode("Players",player,"Data").getList(stringTransformer);
 				String[] tempArr = new String[tempList.size()];
 				tempArr = tempList.toArray(tempArr);
 				playerList[i] = tempArr;
@@ -65,50 +65,66 @@ public class PlayerEvents {
 	public void onJoin (PlayerJoinEvent jEvent) {
 		String player = jEvent.getUser().getUniqueId().toString();
 		String playerName = jEvent.getUser().getName();
-		for (int i=0; i<playerList.length; i++){
-			getLogger().info("i = "+Integer.toString(i));
-			if (playerList[i][0].equals(player) && playerList[i][1].equals(playerName)){
-				jEvent.getUser().sendMessage(getMessage("Welcome back "+playerList[i][1]+"!"));
-			}else if (playerName.equals(playerList[i][1]) && player != playerList[i][0]){
-				jEvent.getUser().kick(getMessage("That's somone else's name!"));
-			}else if (playerList[i][0].equals(player) && playerList[i][1] != playerName){
-				jEvent.getUser().kick(getMessage("Sorry,"+playerName+"no multiple names untill sponge updates"));
-			}else if (i == playerList.length && playerList[i][0] != player && playerList[i][1] != playerName){
-				String[][] tempArr = new String[playerList.length+1][4];
-				for (int j=0; j<tempArr.length; j++){
-					getLogger().info("j = "+Integer.toString(i));
-					if (j == tempArr.length-1){
-						String[] tempPlayer = {player, playerName ,"spirit","global"};
-						tempArr[j] = tempPlayer;
-						List<String> savePlayer = new ArrayList<String>(Arrays.asList(tempPlayer)); 
-						eventNode.getNode("Players",player).setValue(savePlayer);
+		if (playerList.length == 0){
+			String[][] tempArr = new String[playerList.length+1][4];
+			String[] tempPlayer = {player, playerName ,"spirit","global"};
+			tempArr[playerList.length] = tempPlayer;
+			List<String> savePlayer = new ArrayList<String>(Arrays.asList(tempPlayer)); 
+			eventNode.getNode("Players",player,"Data").setValue(savePlayer);
+			try {
+				eventConfig.save(eventNode);
+				playerList = new String[tempArr.length][4];
+				playerList = tempArr;
+			} catch (IOException e) {
+				getLogger().error("user config could not be edited for "+playerName);
+			}
+		}else{
+			for (int i=0; i<playerList.length; i++){
+				if (playerList[i][0].equals(player) && playerList[i][1].equals(playerName)){
+					jEvent.getUser().sendMessage(getMessage("Welcome back "+playerList[i][1]+"!"));
+				}else if (playerName.equals(playerList[i][1]) && player != playerList[i][0]){
+					jEvent.getUser().sendMessage(getMessage("You're lucky I can't get sponge to kick you! -wrong uuid error"));
+					
+					//jEvent.getUser().kick(getMessage("That's somone else's name!"));
+				}else if (playerList[i][0].equals(player) && playerList[i][1] != playerName){
+					jEvent.getUser().sendMessage(getMessage("You're lucky I can't get sponge to kick you! -wrong name error"));
+					
+					//jEvent.getUser().kick(getMessage("Sorry,"+playerName+"no multiple names untill sponge updates"));
+				}else if (i == playerList.length-1 && playerList[i][0] != player && playerList[i][1] != playerName){
+					String[][] tempArr = new String[playerList.length+1][4];
+					for (int j=0; j<tempArr.length; j++){
+						if (j == tempArr.length-1){
+							String[] tempPlayer = {player, playerName ,"spirit","global"};
+							tempArr[j] = tempPlayer;
+							List<String> savePlayer = new ArrayList<String>(Arrays.asList(tempPlayer)); 
+							eventNode.getNode("Players",player,"Data").setValue(savePlayer);
+							playerList = new String[tempArr.length][4];
+							playerList = tempArr;
+							try {
+								eventConfig.save(eventNode);
+							} catch (IOException e) {
+								getLogger().error("user config could not be edited for "+playerName);
+							}
+						}else{
+							tempArr[j] = playerList[j];
+						}
+					}
+				}else if (playerList.length == 1){
+					String[][] tempArr = new String[playerList.length+1][4];
+					String[] tempPlayer = {player, playerName ,"spirit","global"};
+					tempArr[playerList.length] = tempPlayer;
+					List<String> savePlayer = new ArrayList<String>(Arrays.asList(tempPlayer)); 
+					eventNode.getNode("Players",player,"Data").setValue(savePlayer);
+					try {
+						eventConfig.save(eventNode);
 						playerList = new String[tempArr.length][4];
 						playerList = tempArr;
-						try {
-							eventConfig.save(eventNode);
-						} catch (IOException e) {
-							getLogger().error("user config could not be edited for "+playerName);
-						}
-					}else{
-						tempArr[j] = playerList[j];
+					} catch (IOException e) {
+						getLogger().error("user config could not be edited for "+playerName);
 					}
+				}else{
+					getLogger().info(playerName+" not found in list, list is populated");
 				}
-			}else if (playerList.length <=1){
-				getLogger().info("playerList is 0 or 1");
-				String[][] tempArr = new String[playerList.length+1][4];
-				String[] tempPlayer = {player, playerName ,"spirit","global"};
-				tempArr[playerList.length] = tempPlayer;
-				List<String> savePlayer = new ArrayList<String>(Arrays.asList(tempPlayer)); 
-				eventNode.getNode("Players",player).setValue(savePlayer);
-				try {
-					eventConfig.save(eventNode);
-					playerList = new String[tempArr.length][4];
-					playerList = tempArr;
-				} catch (IOException e) {
-					getLogger().error("user config could not be edited for "+playerName);
-				}
-			}else{
-				getLogger().info(playerName+" not found in list, list is populated");
 			}
 		}
 	}

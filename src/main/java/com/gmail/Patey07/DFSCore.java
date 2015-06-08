@@ -12,6 +12,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import org.slf4j.Logger;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.event.state.ServerStartingEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -25,6 +26,7 @@ import com.google.inject.Inject;
 	@Plugin(id = "DFSCore", name = "DFS-Core", version = "0.1.0")
 	public class DFSCore {
 		private static Logger logger;
+		@Inject public Game game;
 		@Inject
 		public DFSCore(Logger logger) {
 		    DFSCore.logger = logger;
@@ -64,9 +66,8 @@ import com.google.inject.Inject;
 					String[][] playerList = { {"UUID1","Patey","human","global"},{"UUID2","Patey2","human2","global2"}};
 					for (int i=0; i<playerList.length; i++){
 						List<String> playerLista = new ArrayList<String>(Arrays.asList(playerList[i])); 
-						config2.getNode("Players",playerList[i][0]).setValue(playerLista);
+						config2.getNode("Players",playerList[i][0],"Data").setValue(playerLista);
 					}
-					config2.getNode("test").setValue("test");
 					userConfig.save(config2);
 					getLogger().info("Default user config created at" + userFile.getAbsolutePath().substring(0,userFile.getAbsolutePath().lastIndexOf(File.separator)));
 				}
@@ -95,10 +96,41 @@ import com.google.inject.Inject;
 					    .build();
 					;
 				
+					
+					CommandSpec homeCommand = CommandSpec.builder()
+						    .description(Texts.of("/home [name]"))
+						    .permission("Basics.command.home")
+						    .arguments(
+			                GenericArguments.optional(GenericArguments.string(Texts.of("home")))
+			                )
+						    .executor(new homeCommand(config,config2,userConfig,game))
+						    .build();
+						;
+						CommandSpec teleportCommand = CommandSpec.builder()
+							    .description(Texts.of("/tp <Player>"))
+							    .permission("Basics.command.teleport")
+							    .arguments(
+				                GenericArguments.onlyOne(GenericArguments.string(Texts.of("player")))
+				                )
+							    .executor(new tpCommand(config,config2,userConfig))
+							    .build();
+							;
+						CommandSpec setHomeCommand = CommandSpec.builder()
+								.description(Texts.of("/sethome [name]"))
+								.permission("Basics.command.sethome")
+								.arguments(
+									GenericArguments.optional(GenericArguments.string(Texts.of("homename")))
+								)
+								.executor(new setHomeCommand(config,config2,userConfig))
+								.build();
+						;
 			event.getGame().getEventManager().register(this, new PlayerEvents(config2,userConfig));
 			event.getGame().getEventManager().register(this, new ChatEvents(config));
 			event.getGame().getCommandDispatcher().register(this, channelCommand, "channel", "c");
 			event.getGame().getCommandDispatcher().register(this, raceCommand, "race", "r");
+			event.getGame().getCommandDispatcher().register(this, homeCommand, "home", "h");
+			event.getGame().getCommandDispatcher().register(this, teleportCommand, "tp", "tp");
+			event.getGame().getCommandDispatcher().register(this, setHomeCommand, "sethome", "seth");
 			getLogger().info("DwarfFortressSuite Core initialized");
 	    }
 	}

@@ -40,7 +40,7 @@ public class channelCommand implements CommandExecutor {
 				tempArr[3] = chan;
 				chanArr[i] = tempArr;
 				List<String> tempList = new ArrayList<String>(Arrays.asList(tempArr));
-				chanNode.getNode("Players",player.getUniqueId().toString()).setValue(tempList);
+				chanNode.getNode("Players",player.getUniqueId().toString(),"Data").setValue(tempList);
 				try {
 					chanConfig.save(chanNode);
 					PlayerEvents.playerList = chanArr;

@@ -41,13 +41,11 @@ public class ChatEvents {
 			if (chatPlayers[i][0].equals(playerTemp)){
 				tempPlay = chatPlayers[i];
 				return tempPlay;
-			}else{
-				return errPlay;
 			}
 		}
-		return errPlay;
-		
-	}
+				return errPlay;
+		}
+	
 	@Subscribe
 	public void onChat (PlayerChatEvent event) {
 		String uuid = event.getUser().getUniqueId().toString();
